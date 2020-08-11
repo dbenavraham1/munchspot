@@ -9,15 +9,15 @@ into their app.
 The overall design provides proxy endpoints to targeted Open Data
 ([Mobile Food Facility Permit](https://dev.socrata.com/foundry/data.sfgov.org/rqzj-sfat)) and
 Google [Geocoding API](https://developers.google.com/maps/documentation/geocoding/overview)
-endpoint api services that retrieve a user's location and finds the nearest food trucks.
-- First a user's location is determined from the device their on or entered as an address.
-- Second the user's location is used to find nearby available food trucks.
+endpoint API services that retrieve a user's location and finds the nearest food trucks.
+- First, a user's location is determined from the device they're on or entered as an address.
+- Second, the user's location is used to find nearby available food trucks.
 
-I was able to leverage the existing Open Data/Google geocoding api services above to locate and find
+I was able to leverage the existing Open Data/Google geocoding API services above to locate and find
 all nearby food trucks around San Francisco.
 
 **Note:**
-This is my second golang project and looking to gain more experience with it.
+This is my second golang project and I'm looking to gain more experience with it.
 
 #### Dependencies
 - Generate an Open Data app token [here](https://data.sfgov.org/profile/edit/developer_settings)
@@ -32,7 +32,7 @@ or use an existing one.
 - `/geolocation/{format:"json/xml"}?address=street%20zipcode&key=apikey` **GET**
 
 This endpoint provides the ability to lookup any free formed address to retrieve the lat/lng
-coordinates to help point a marker on a map. The coordinates are used as input to the next
+coordinates to help point a marker on a map. The coordinates are used as input to the 
 food truck location lookup service.
 
 **Required:** X-Geocode-App-Token header
@@ -62,8 +62,7 @@ __________________________________________________________________
 
 - `/food/resource/{id}/{format:"json/xml/csv"}` **GET**
 
-This endpoint is used to lookup food trucks around San Francisco based on provided lat/lng coordinates.
-A service 
+This endpoint is used to lookup food trucks around San Francisco, based on provided lat/lng coordinates.
 
 **Required:** Authorization header
 

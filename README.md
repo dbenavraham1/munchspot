@@ -120,8 +120,8 @@ curl -H 'X-App-Token: {appToken}' 'http://localhost:8080/food/resource/rqzj-sfat
 #### Running
 - Clone
 ```
-git clone {project}
-cd {project}
+git clone https://github.com/dbenavraham1/munchspot.git
+cd munchspot
 ```
 - Build
 ```

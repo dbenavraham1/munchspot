@@ -1,0 +1,10 @@
+# app.yml
+
+server:
+  host: localhost
+  port: 8080
+  timeout:
+    server: 30
+    read: 15
+    write: 10
+    idle: 5

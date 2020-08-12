@@ -2,11 +2,19 @@ package controllers
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
+)
+
+const (
+	jsonFormat = "json"
+	xmlFormat = "xml"
+	csvFormat = "csv"
 )
 
 type MobileFoodFacilityPermit struct {
@@ -38,6 +46,44 @@ type Location struct {
 	Coordinates []float64 `json:"coordinates"`
 }
 
+type MobileFoodFacilityPermitsResponse struct {
+	XMLName xml.Name `xml:"response"`
+	Text    string   `xml:",chardata"`
+	Row     struct {
+		Text string `xml:",chardata"`
+		Row  []struct {
+			Text                string `xml:",chardata"`
+			ID                  string `xml:"_id,attr"`
+			Uuid                string `xml:"_uuid,attr"`
+			Position            string `xml:"_position,attr"`
+			AttrAddress         string `xml:"_address,attr"`
+			Objectid            string `xml:"objectid"`
+			Applicant           string `xml:"applicant"`
+			Facilitytype        string `xml:"facilitytype"`
+			Cnn                 string `xml:"cnn"`
+			Locationdescription string `xml:"locationdescription"`
+			Address             string `xml:"address"`
+			Blocklot            string `xml:"blocklot"`
+			Block               string `xml:"block"`
+			Lot                 string `xml:"lot"`
+			Permit              string `xml:"permit"`
+			Status              string `xml:"status"`
+			Fooditems           string `xml:"fooditems"`
+			X                   string `xml:"x"`
+			Y                   string `xml:"y"`
+			Latitude            string `xml:"latitude"`
+			Longitude           string `xml:"longitude"`
+			Schedule            string `xml:"schedule"`
+			Dayshours           string `xml:"dayshours"`
+			Approved            string `xml:"approved"`
+			Received            string `xml:"received"`
+			Priorpermit         string `xml:"priorpermit"`
+			Expirationdate      string `xml:"expirationdate"`
+			Location            string `xml:"location"`
+		} `xml:"row"`
+	} `xml:"row"`
+}
+
 func FoodResourceHandler(w http.ResponseWriter, r *http.Request) {
 	appToken := r.Header.Get("X-App-Token")
 
@@ -56,27 +102,68 @@ func FoodResourceHandler(w http.ResponseWriter, r *http.Request) {
 	req.Header.Set("Content-Type", "application/json");
 
 	client := NewClient(BaseApiUrl)
-	mobileFoodFacilityPermits, err := getFoodLocations(client, req)
-	if err != nil {
-		encoder := json.NewEncoder(w)
-		encoder.SetIndent("", " ")
-		err = encoder.Encode(err)
-		if err != nil {
-			panic(err)
-		}
 
-		panic(err)
-	} else {
-		encoder := json.NewEncoder(w)
-		encoder.SetIndent("", " ")
-		err = encoder.Encode(mobileFoodFacilityPermits)
+	if format == jsonFormat {
+		mobileFoodFacilityPermitsJson, err := getFoodLocationsJson(client, req)
 		if err != nil {
+			encoder := json.NewEncoder(w)
+			encoder.SetIndent("", " ")
+			err = encoder.Encode(err)
+			if err != nil {
+				panic(err)
+			}
+
 			panic(err)
+		} else {
+			encoder := json.NewEncoder(w)
+			encoder.SetIndent("", " ")
+			err = encoder.Encode(mobileFoodFacilityPermitsJson)
+			if err != nil {
+				panic(err)
+			}
+		}
+	} else if format == xmlFormat {
+		mobileFoodFacilityPermitsCsv, err := getFoodLocationsCsv(client, req)
+		if err != nil {
+			encoder := json.NewEncoder(w)
+			encoder.SetIndent("", " ")
+			err = encoder.Encode(err)
+			if err != nil {
+				panic(err)
+			}
+
+			panic(err)
+		} else {
+			w.Header().Set("Content-Disposition", "attachment; filename=mobilefoodfacilitypermits.csv")
+			w.Header().Set("Content-Type", "text/csv; charset=UTF-8")
+			w.Header().Set("Content-Length", strconv.Itoa(len(mobileFoodFacilityPermitsCsv)))
+			if _, err := w.Write(mobileFoodFacilityPermitsCsv); err != nil {
+				panic(err)
+			}
+		}
+	} else if format == csvFormat {
+		mobileFoodFacilityPermitsCsv, err := getFoodLocationsCsv(client, req)
+		if err != nil {
+			encoder := json.NewEncoder(w)
+			encoder.SetIndent("", " ")
+			err = encoder.Encode(err)
+			if err != nil {
+				panic(err)
+			}
+
+			panic(err)
+		} else {
+			w.Header().Set("Content-Disposition", "attachment; filename=mobilefoodfacilitypermits.csv")
+			w.Header().Set("Content-Type", "text/csv; charset=UTF-8")
+			w.Header().Set("Content-Length", strconv.Itoa(len(mobileFoodFacilityPermitsCsv)))
+			if _, err := w.Write(mobileFoodFacilityPermitsCsv); err != nil {
+				panic(err)
+			}
 		}
 	}
 }
 
-func getFoodLocations(client *Client, r *http.Request) ([]MobileFoodFacilityPermit, error) {
+func getFoodLocationsJson(client *Client, r *http.Request) ([]MobileFoodFacilityPermit, error) {
 	resp, err := client.httpClient.Do(r)
 	if err != nil {
 		panic(err)
@@ -95,4 +182,40 @@ func getFoodLocations(client *Client, r *http.Request) ([]MobileFoodFacilityPerm
 	} else {
 		return mobileFoodFacilityPermits, nil
 	}
+}
+
+func getFoodLocationsXml(client *Client, r *http.Request) (MobileFoodFacilityPermitsResponse, error) {
+	resp, err := client.httpClient.Do(r)
+	if err != nil {
+		panic(err)
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	mobileFoodFacilityPermitsResponse := MobileFoodFacilityPermitsResponse{}
+	err = xml.Unmarshal(body, &mobileFoodFacilityPermitsResponse)
+	if err != nil {
+		return mobileFoodFacilityPermitsResponse, err
+	} else {
+		return mobileFoodFacilityPermitsResponse, nil
+	}
+}
+
+func getFoodLocationsCsv(client *Client, r *http.Request) ([]byte, error) {
+	resp, err := client.httpClient.Do(r)
+	if err != nil {
+		panic(err)
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	return body, err
 }

@@ -69,12 +69,23 @@ This endpoint is used to lookup food trucks around San Francisco, based on provi
 `X-App-Token: {appToken}`
 
 ##### Example request
+######Ex: JSON
 ```bash
 curl -H 'X-App-Token: {appToken}' 'http://localhost:8080/food/resource/rqzj-sfat/json?$where=within_circle(location,37.7708922310318,-122.389169231483,500)'
 ```
 
 ```bash
 curl -H 'X-App-Token: {appToken}' 'http://localhost:8080/food/resource/rqzj-sfat/json?$where=within_circle(location,37.7708922310318,-122.389169231483,500)&$limit=5&$offset=0'
+```
+
+######Ex: XML
+```bash
+curl -H 'X-App-Token: JFRrfhaGoBN4wHCnHFFhYA6pE' 'http://localhost:8080/food/resource/rqzj-sfat/xml?$where=within_circle(location,37.7708922310318,-122.389169231483,500)'
+```
+
+######Ex: CSV
+```bash
+curl -H 'X-App-Token: JFRrfhaGoBN4wHCnHFFhYA6pE' 'http://localhost:8080/food/resource/rqzj-sfat/csv?$where=within_circle(location,37.7708922310318,-122.389169231483,500)' -o temp.csv
 ```
 
 | Parameter    | Default   | Required  |
